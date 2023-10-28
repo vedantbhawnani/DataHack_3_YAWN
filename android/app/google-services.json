@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "317547619587",
+    "project_id": "fitai-6ada4",
+    "storage_bucket": "fitai-6ada4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:317547619587:android:cfa35f46f7ffc7c9503536",
+        "android_client_info": {
+          "package_name": "com.example.exerciserecognition"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO0fuu6U13LQFDmy9yJHswMS1N0uD5FWU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
