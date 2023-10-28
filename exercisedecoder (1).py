@@ -6,6 +6,8 @@ import time
 import mediapipe as mp
 import tensorflow as tf
 import math
+# from mediapipe.solutions.hands import mp.solutions.hands.Hands.
+
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import multilabel_confusion_matrix, accuracy_score, classification_report
@@ -28,16 +30,11 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = "3"
 tf.get_logger().setLevel("ERROR")
 tf.autograph.set_verbosity(1)
 
-# suppress untraced functions warning
+# suppush_ups untraced functions warning
 import absl.logging
 absl.logging.set_verbosity(absl.logging.ERROR)
 
-"""# 1. Keypoints using MP Pose"""
-
-# Pre-trained pose estimation model from Google Mediapipe
 mp_pose = mp.solutions.pose
-
-# Supported Mediapipe visualization tools
 mp_drawing = mp.solutions.drawing_utils
 
 def mediapipe_detection(image, model):
@@ -59,6 +56,7 @@ HEIGHT = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) # webcam video frame height
 WIDTH = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) # webcam video frame width
 FPS = int(cap.get(cv2.CAP_PROP_FPS)) # webcam video fram rate
 
+
 # Set and test mediapipe model using webcam
 with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
     while cap.isOpened():
@@ -68,6 +66,12 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
 
         # Make detection
         image, results = mediapipe_detection(frame, pose)
+
+        set_counter = 0
+
+        # Define the hand landmark model
+        hand_landmark_model = mp.solutions.hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+
 
         # Extract landmarks
         try:
@@ -88,15 +92,12 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
     cap.release()
     cv2.destroyAllWindows()
 
-"""# 2. Extract Keypoints"""
-
-# Recollect and organize keypoints from the test
 pose = []
 for res in results.pose_landmarks.landmark:
     test = np.array([res.x, res.y, res.z, res.visibility])
     pose.append(test)
 
-# 33 landmarks with 4 values (x, y, z, visibility)
+
 num_landmarks = len(landmarks)
 num_values = len(test)
 num_input_values = num_landmarks*num_values
@@ -124,7 +125,7 @@ if not os.path.exists(DATA_PATH):
     os.makedirs(DATA_PATH)
 
 # Actions/exercises that we try to detect
-actions = np.array(['curl', 'press', 'squat'])
+actions = np.array(['bicep_curl', 'push_ups', 'squat'])
 num_classes = len(actions)
 
 # How many videos worth of data
@@ -147,7 +148,7 @@ for action in actions:
 
 """# 4. Collect Keypoint Values for Training and Testing"""
 
-# Colors associated with each exercise (e.g., curls are denoted by blue, squats are denoted by orange, etc.)
+# Colors associated with each exercise (e.g., bicep_curls are denoted by blue, squats are denoted by orange, etc.)
 colors = [(245,117,16), (117,245,16), (16,117,245)]
 
 # Collect Training Data
@@ -212,8 +213,6 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
 
 cap.release()
 cv2.destroyAllWindows()
-
-"""# 5. Preprocess Data and Create Labels/Features"""
 
 label_map = {label:num for num, label in enumerate(actions)}
 
@@ -361,27 +360,27 @@ eval_results['precision'] = None
 eval_results['recall'] = None
 eval_results['f1 score'] = None
 
-confusion_matrices = {}
+# confusion_matrices = {}
 classification_accuracies = {}
 precisions = {}
 recalls = {}
 f1_scores = {}
 
-"""## 9a. Confusion Matrices"""
+# """## 9a. Confusion Matrices"""
 
-for model_name, model in models.items():
-    yhat = model.predict(X_test, verbose=0)
+# for model_name, model in models.items():
+#     yhat = model.predict(X_test, verbose=0)
 
-    # Get list of classification predictions
-    ytrue = np.argmax(y_test, axis=1).tolist()
-    yhat = np.argmax(yhat, axis=1).tolist()
+#     # Get list of classification predictions
+#     ytrue = np.argmax(y_test, axis=1).tolist()
+#     yhat = np.argmax(yhat, axis=1).tolist()
 
-    # Confusion matrix
-    confusion_matrices[model_name] = multilabel_confusion_matrix(ytrue, yhat)
-    print(f"{model_name} confusion matrix: {os.linesep}{confusion_matrices[model_name]}")
+#     # Confusion matrix
+#     confusion_matrices[model_name] = multilabel_confusion_matrix(ytrue, yhat)
+#     print(f"{model_name} confusion matrix: {os.linesep}{confusion_matrices[model_name]}")
 
-# Collect results
-eval_results['confusion matrix'] = confusion_matrices
+# # Collect results
+# eval_results['confusion matrix'] = confusion_matrices
 
 """## 9b. Accuracy"""
 
@@ -425,11 +424,57 @@ eval_results['recall'] = recalls
 eval_results['f1 score'] = f1_scores
 
 """# 10. Choose Model to Test in Real Time"""
+model.save("model.h5")
 
 model = AttnLSTM
 model_name = 'AttnLSTM'
+# model = tf.keras.models.load_model('LSTM_Attention_128HUs.h5')
 
+# def recognize_gesture(landmarks):
+#   # Calculate the distance between the thumb and the index finger
+#   thumb_index_distance = np.linalg.norm(landmarks[8] - landmarks[5])
+
+#   # If the distance is less than a certain threshold, the user is making a fist
+#   if thumb_index_distance < 0.1:
+#     return 'fist'
+
+#   # Otherwise, the user is not making a fist
+#   else:
+#     return 'open'
+
+# # Capture video from the webcam
+# cap = cv2.VideoCapture(0)
+
+# while True:
+#   # Read a frame from the video
+#   ret, frame = cap.read()
+  
+#   hands = mp.solutions.hands.Hands(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+#   # Make a hand landmark detection
+#   hand_landmarks = hand_landmark_model.process(frame.copy())
+
+#   # If a hand is detected, recognize the gesture
+#   if hand_landmarks.multi_hand_landmarks:
+#     gesture = recognize_gesture(hand_landmarks.multi_hand_landmarks[0].landmark)
+# #   if hand_landmarks.multi_hand_landmarks:
+# #     for hand_landmarks in hand_landmarks.multi_hand_landmarks:
+# #         mp.solutions.drawing_utils.draw_landmarks(frame, hand_landmarks, mp.solutions.hands.HAND_CONNECTIONS)
+
+#     # If the user is making a fist, increment the set counter
+#     if gesture == 'fist':
+#       set_counter += 1
+
+#   # Draw the set counter on the frame
+#   cv2.putText(frame, f'Set counter: {set_counter}', (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+#   # Display the frame
+#   cv2.imshow('OpenCV Feed', frame)
+
+#   # If the 'q' key is pressed, break the loop
+#   if cv2.waitKey(10) & 0xFF == ord('q'):
+#     break
 """# 11. Calculate Joint Angles & Count Reps"""
+
 
 def calculate_angle(a,b,c):
     """
@@ -481,9 +526,9 @@ def count_reps(image, current_action, landmarks, mp_pose):
 
     """
 
-    global curl_counter, press_counter, squat_counter, curl_stage, press_stage, squat_stage
+    global bicep_curl_counter, push_ups_counter, squat_counter, bicep_curl_stage, push_ups_stage, squat_stage
 
-    if current_action == 'curl':
+    if current_action == 'bicep_curl':
         # Get coords
         shoulder = get_coordinates(landmarks, mp_pose, 'left', 'shoulder')
         elbow = get_coordinates(landmarks, mp_pose, 'left', 'elbow')
@@ -492,19 +537,19 @@ def count_reps(image, current_action, landmarks, mp_pose):
         # calculate elbow angle
         angle = calculate_angle(shoulder, elbow, wrist)
 
-        # curl counter logic
+        # bicep_curl counter logic
         if angle < 30:
-            curl_stage = "up"
-        if angle > 140 and curl_stage =='up':
-            curl_stage="down"
-            curl_counter +=1
-        press_stage = None
+            bicep_curl_stage = "up"
+        if angle > 140 and bicep_curl_stage =='up':
+            bicep_curl_stage="down"
+            bicep_curl_counter +=1
+        push_ups_stage = None
         squat_stage = None
 
         # Viz joint angle
         viz_joint_angle(image, angle, elbow)
 
-    elif current_action == 'press':
+    elif current_action == 'push_ups':
 
         # Get coords
         shoulder = get_coordinates(landmarks, mp_pose, 'left', 'shoulder')
@@ -518,13 +563,13 @@ def count_reps(image, current_action, landmarks, mp_pose):
         shoulder2elbow_dist = abs(math.dist(shoulder,elbow))
         shoulder2wrist_dist = abs(math.dist(shoulder,wrist))
 
-        # Press counter logic
-        if (elbow_angle > 130) and (shoulder2elbow_dist < shoulder2wrist_dist):
-            press_stage = "up"
-        if (elbow_angle < 50) and (shoulder2elbow_dist > shoulder2wrist_dist) and (press_stage =='up'):
-            press_stage='down'
-            press_counter += 1
-        curl_stage = None
+        # push_ups counter logic
+        if (elbow_angle > 150) and (shoulder2elbow_dist < shoulder2wrist_dist):
+            push_ups_stage = "up"
+        if (elbow_angle < 50) and (shoulder2elbow_dist > shoulder2wrist_dist) and (push_ups_stage =='up'):
+            push_ups_stage='down'
+            push_ups_counter += 1
+        bicep_curl_stage = None
         squat_stage = None
 
         # Viz joint angle
@@ -558,8 +603,8 @@ def count_reps(image, current_action, landmarks, mp_pose):
         if (left_knee_angle > thr) and (right_knee_angle > thr) and (left_hip_angle > thr) and (right_hip_angle > thr) and (squat_stage =='down'):
             squat_stage='up'
             squat_counter += 1
-        curl_stage = None
-        press_stage = None
+        bicep_curl_stage = None
+        push_ups_stage = None
 
         # Viz joint angles
         viz_joint_angle(image, left_knee_angle, left_knee)
@@ -591,18 +636,18 @@ threshold = 0.5 # minimum confidence to classify as an action/exercise
 current_action = ''
 
 # Rep counter logic variables
-curl_counter = 0
-press_counter = 0
+bicep_curl_counter = 0
+push_ups_counter = 0
 squat_counter = 0
-curl_stage = None
-press_stage = None
+bicep_curl_stage = None
+push_ups_stage = None
 squat_stage = None
 
 # Camera object
 cap = cv2.VideoCapture(0)
 
 # Video writer object that saves a video of the real time test
-fourcc = cv2.VideoWriter_fourcc('M','J','P','G') # video compression format
+fourcc = cv2.VideoWriter_fourcc('M','J','P','G') # video compush_upsion format
 HEIGHT = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) # webcam video frame height
 WIDTH = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) # webcam video frame width
 FPS = int(cap.get(cv2.CAP_PROP_FPS)) # webcam video fram rate
@@ -652,9 +697,9 @@ with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as 
 
             # Display graphical information
             cv2.rectangle(image, (0,0), (640, 40), colors[np.argmax(res)], -1)
-            cv2.putText(image, 'curl ' + str(curl_counter), (3,30),
+            cv2.putText(image, 'bicep_curl ' + str(bicep_curl_counter), (3,30),
                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-            cv2.putText(image, 'press ' + str(press_counter), (240,30),
+            cv2.putText(image, 'push_ups ' + str(push_ups_counter), (240,30),
                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
             cv2.putText(image, 'squat ' + str(squat_counter), (490,30),
                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
