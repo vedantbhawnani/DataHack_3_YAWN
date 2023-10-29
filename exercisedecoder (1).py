@@ -47,8 +47,8 @@ def mediapipe_detection(image, model):
 
 def draw_landmarks(image, results):
     mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS,
-                                mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=2),
-                                mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
+                                mp_drawing.DrawingSpec(color=(225,225,225), thickness=2, circle_radius=2),
+                                mp_drawing.DrawingSpec(color=(0,0,0), thickness=2, circle_radius=2)
                                  )
 
 cap = cv2.VideoCapture(0) # camera object
@@ -149,7 +149,7 @@ for action in actions:
 """# 4. Collect Keypoint Values for Training and Testing"""
 
 # Colors associated with each exercise (e.g., bicep_curls are denoted by blue, squats are denoted by orange, etc.)
-colors = [(245,117,16), (117,245,16), (16,117,245)]
+colors = [(5, 32, 74), (0, 148, 198), (192,192,192)]
 
 # Collect Training Data
 
@@ -426,6 +426,13 @@ eval_results['f1 score'] = f1_scores
 """# 10. Choose Model to Test in Real Time"""
 model.save("model.h5")
 
+# Save the model.
+with open('model.tflite', 'wb') as f:
+  f.write(tflite_model)
+# Save the model.
+with open('model.tflite', 'wb') as f:
+  f.write(tflite_model)
+
 model = AttnLSTM
 model_name = 'AttnLSTM'
 # model = tf.keras.models.load_model('LSTM_Attention_128HUs.h5')
@@ -473,14 +480,8 @@ model_name = 'AttnLSTM'
 #   # If the 'q' key is pressed, break the loop
 #   if cv2.waitKey(10) & 0xFF == ord('q'):
 #     break
-"""# 11. Calculate Joint Angles & Count Reps"""
-
 
 def calculate_angle(a,b,c):
-    """
-    Computes 3D joint angle inferred by 3 keypoints and their relative positions to one another
-
-    """
     a = np.array(a) # First
     b = np.array(b) # Mid
     c = np.array(c) # End
@@ -494,26 +495,12 @@ def calculate_angle(a,b,c):
     return angle
 
 def get_coordinates(landmarks, mp_pose, side, joint):
-    """
-    Retrieves x and y coordinates of a particular keypoint from the pose estimation model
-
-     Args:
-         landmarks: processed keypoints from the pose estimation model
-         mp_pose: Mediapipe pose estimation model
-         side: 'left' or 'right'. Denotes the side of the body of the landmark of interest.
-         joint: 'shoulder', 'elbow', 'wrist', 'hip', 'knee', or 'ankle'. Denotes which body joint is associated with the landmark of interest.
-
-    """
     coord = getattr(mp_pose.PoseLandmark,side.upper()+"_"+joint.upper())
     x_coord_val = landmarks[coord.value].x
     y_coord_val = landmarks[coord.value].y
     return [x_coord_val, y_coord_val]
 
 def viz_joint_angle(image, angle, joint):
-    """
-    Displays the joint angle value near the joint within the image frame
-
-    """
     cv2.putText(image, str(int(angle)),
                    tuple(np.multiply(joint, [640, 480]).astype(int)),
                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2, cv2.LINE_AA
@@ -521,11 +508,6 @@ def viz_joint_angle(image, angle, joint):
     return
 
 def count_reps(image, current_action, landmarks, mp_pose):
-    """
-    Counts repetitions of each exercise. Global count and stage (i.e., state) variables are updated within this function.
-
-    """
-
     global bicep_curl_counter, push_ups_counter, squat_counter, bicep_curl_stage, push_ups_stage, squat_stage
 
     if current_action == 'bicep_curl':
@@ -613,14 +595,8 @@ def count_reps(image, current_action, landmarks, mp_pose):
     else:
         pass
 
-"""# 12. Test in Real Time"""
 
 def prob_viz(res, actions, input_frame, colors):
-    """
-    This function displays the model prediction probability distribution over the set of exercise classes
-    as a horizontal bar graph
-
-    """
     output_frame = input_frame.copy()
     for num, prob in enumerate(res):
         cv2.rectangle(output_frame, (0,60+num*40), (int(prob*100), 90+num*40), colors[num], -1)
