@@ -4,9 +4,8 @@ import 'package:exerciserecognition/Screens/statistics.dart';
 import 'package:flutter/material.dart';
 import 'Screens/splashScreen2.dart';
 import 'Screens/StartScreen.dart';
-import 'Screens/startWorkout.dart';
 import 'Screens/SignUp.dart';
-import 'Screens/AgeWeightHeight.dart';
+import 'Screens/detector/startWorkout.dart';
 import 'Screens/login.dart';
 import 'Screens/endWorkout.dart';
 
@@ -29,9 +28,10 @@ class RoutesClass extends StatelessWidget {
         'signup' : (context)=>SignUp(),
         'homescreen': (context) => HomeScreen(),
         'login' : (context) => LogIn(),
-        'startWorkout': (context)=> CameraApp(),
+        'startWorkout': (context)=> PoseDetectorView(),
         'endWorkout': (context) => EndWorkout(),
         'statistics': (context) => Statistics(),
+
       },
     );
   }

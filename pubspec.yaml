@@ -43,6 +43,12 @@ dependencies:
   permission_handler: ^11.0.1
   flutter_svg: ^2.0.8
   syncfusion_flutter_charts: ^23.1.42
+  tflite_flutter: ^0.10.3
+  #  body_detection: ^0.0.3
+  google_mlkit_pose_detection: ^0.9.0
+  google_ml_kit: ^0.16.2
+  path_provider: ^2.1.1
+  image_picker: ^1.0.4
 
 dev_dependencies:
   flutter_test:
@@ -68,7 +74,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-     - images/
+    - images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -82,15 +88,15 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-     - family: ObjectSans
-       fonts:
-         - asset: fonts/ObjectSans-Heavy.ttf
-     - family: Vercetti
-       fonts:
-         - asset: fonts/Vercetti-Regular.ttf
-     - family: Northwell
-       fonts:
-         - asset: fonts/Northwell.ttf
+    - family: ObjectSans
+      fonts:
+        - asset: fonts/ObjectSans-Heavy.ttf
+    - family: Vercetti
+      fonts:
+        - asset: fonts/Vercetti-Regular.ttf
+    - family: Northwell
+      fonts:
+        - asset: fonts/Northwell.ttf
 
   #         style: italic
   #   - family: Trajan Pro

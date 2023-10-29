@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 
 
 class Statistics extends StatefulWidget {
@@ -11,6 +10,7 @@ class Statistics extends StatefulWidget {
 }
 
 class _StatisticsState extends State<Statistics> {
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -72,9 +72,9 @@ class _StatisticsState extends State<Statistics> {
               series: <CircularSeries>[
                 RadialBarSeries<WorkoutReps,String>(
                   dataSource: <WorkoutReps>[
-                      WorkoutReps('Push Ups', 20),
-                      WorkoutReps('Squats', 10),
-                      WorkoutReps('Overhead Press', 15),
+                      WorkoutReps('Push Ups',10),
+                      WorkoutReps('Squats',40),
+                      WorkoutReps('Overhead Press',30),
                   ],
                   xValueMapper: (WorkoutReps workout, _) => workout.workout,
                   yValueMapper: (WorkoutReps workout, _) => workout.reps,
